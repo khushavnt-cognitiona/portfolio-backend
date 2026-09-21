@@ -2,8 +2,10 @@ package com.khushvant.portfolio.config;
 
 import com.khushvant.portfolio.model.*;
 import com.khushvant.portfolio.repository.*;
+import com.khushvant.portfolio.service.ResumeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,6 +19,8 @@ public class DataInitializer implements CommandLineRunner {
     private final ExperienceRepository experienceRepository;
     private final EducationRepository educationRepository;
     private final CertificationRepository certificationRepository;
+    private final ResumeRepository resumeRepository;
+    private final ResumeService resumeService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -117,6 +121,18 @@ public class DataInitializer implements CommandLineRunner {
                     Certification.builder().name("Business Plan Development").issuer("Harvard ManageMentor").build(),
                     Certification.builder().name("Strategy Planning & Execution").issuer("Harvard ManageMentor").build()
             ));
+        }
+
+        if (resumeRepository.count() == 0) {
+            try {
+                ClassPathResource resource = new ClassPathResource("pdf/Khushwant_Jadhao.pdf");
+                if (resource.exists()) {
+                    byte[] pdfBytes = resource.getInputStream().readAllBytes();
+                    resumeService.saveResume("Khushwant_Jadhao.pdf", "application/pdf", pdfBytes);
+                }
+            } catch (Exception e) {
+                System.err.println("Could not initialize resume PDF: " + e.getMessage());
+            }
         }
     }
 }
